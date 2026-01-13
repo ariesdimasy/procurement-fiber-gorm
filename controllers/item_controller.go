@@ -28,5 +28,30 @@ func GetItems(ctx *fiber.Ctx) error {
 }
 
 func CreateItem(ctx *fiber.Ctx) error {
-	return ctx.SendStatus(fiber.StatusCreated)
+
+	var item models.ItemRequestData
+
+	if err := ctx.BodyParser(&item); err != nil {
+		return ctx.Status(400).JSON(fiber.Map{
+			"message": "Invalid request",
+			"error":   err.Error(),
+		})
+	}
+
+	newItem := models.Item{
+		Name:  item.Name,
+		Stock: item.Stock,
+		Price: item.Price,
+	}
+
+	query := config.DB.Create(&newItem)
+
+	if query.Error != nil {
+		return ctx.Status(500).JSON(query.Error)
+	}
+
+	return ctx.Status(200).JSON(fiber.Map{
+		"message": "Items created successfully",
+		"data":    item,
+	})
 }
