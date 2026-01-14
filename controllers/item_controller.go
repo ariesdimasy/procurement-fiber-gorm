@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"procurement-fiber-gorm/config"
 	"procurement-fiber-gorm/models"
+	"procurement-fiber-gorm/validations"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -29,7 +31,7 @@ func GetItems(ctx *fiber.Ctx) error {
 
 func CreateItem(ctx *fiber.Ctx) error {
 
-	var item models.ItemRequestData
+	var item validations.ItemRequestValidation
 
 	if err := ctx.BodyParser(&item); err != nil {
 		return ctx.Status(400).JSON(fiber.Map{
@@ -38,10 +40,22 @@ func CreateItem(ctx *fiber.Ctx) error {
 		})
 	}
 
-	newItem := models.Item{
-		Name:  item.Name,
-		Stock: item.Stock,
-		Price: item.Price,
+	validate := *validator.New()
+
+	err := validate.Struct(item)
+
+	if err != nil {
+		return ctx.Status(400).JSON(fiber.Map{
+			"message": "Validation failed",
+			"error":   err.(validator.ValidationErrors).Error(),
+		})
+	}
+
+	newItem := models.ItemRequestData{
+		Name:        item.Name,
+		Description: item.Description,
+		Stock:       item.Stock,
+		Price:       item.Price,
 	}
 
 	query := config.DB.Create(&newItem)
@@ -53,5 +67,48 @@ func CreateItem(ctx *fiber.Ctx) error {
 	return ctx.Status(200).JSON(fiber.Map{
 		"message": "Items created successfully",
 		"data":    item,
+	})
+}
+
+func UpdateItem(ctx *fiber.Ctx) error {
+
+	var item validations.ItemRequestValidation
+
+	if err := ctx.BodyParser(&item); err != nil {
+
+		return ctx.Status(400).JSON(fiber.Map{
+			"message": "Invalid request",
+			"error":   err.Error(),
+		})
+	}
+
+	validate := *validator.New()
+
+	err := validate.Struct(item)
+
+	if err != nil {
+
+		return ctx.Status(400).JSON(fiber.Map{
+			"message": "Validation failed",
+			"error":   err.(validator.ValidationErrors).Error(),
+		})
+	}
+
+	updateItem := models.ItemRequestData{
+		Name:        item.Name,
+		Description: item.Description,
+		Stock:       item.Stock,
+		Price:       item.Price,
+	}
+
+	query := config.DB.Model(&models.ItemRequestData{}).Where("id = ?", ctx.Params("id")).Updates(updateItem)
+
+	if query.Error != nil {
+		return ctx.Status(500).JSON(query.Error)
+	}
+
+	return ctx.Status(200).JSON(fiber.Map{
+		"message": "Item updated successfully",
+		"data":    updateItem,
 	})
 }
