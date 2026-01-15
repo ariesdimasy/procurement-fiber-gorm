@@ -42,12 +42,12 @@ func CreateItem(ctx *fiber.Ctx) error {
 
 	validate := *validator.New()
 
-	err := validate.Struct(item)
+	errValidate := validate.Struct(item)
 
-	if err != nil {
+	if errValidate != nil {
 		return ctx.Status(400).JSON(fiber.Map{
 			"message": "Validation failed",
-			"error":   err.(validator.ValidationErrors).Error(),
+			"error":   errValidate.(validator.ValidationErrors).Error(),
 		})
 	}
 
@@ -84,13 +84,13 @@ func UpdateItem(ctx *fiber.Ctx) error {
 
 	validate := *validator.New()
 
-	err := validate.Struct(item)
+	errValidate := validate.Struct(item)
 
-	if err != nil {
+	if errValidate != nil {
 
 		return ctx.Status(400).JSON(fiber.Map{
 			"message": "Validation failed",
-			"error":   err.(validator.ValidationErrors).Error(),
+			"error":   errValidate.(validator.ValidationErrors).Error(),
 		})
 	}
 
@@ -111,4 +111,23 @@ func UpdateItem(ctx *fiber.Ctx) error {
 		"message": "Item updated successfully",
 		"data":    updateItem,
 	})
+}
+
+func DeleteItem(ctx *fiber.Ctx) error {
+
+	var params map[string]string = ctx.AllParams()
+
+	queryFindItem := config.DB.Select("id").Find()
+
+	fmt.Println(queryFindItem.Statement.Vars...)
+
+	if queryFindItem.Error != nil {
+		return ctx.Status(500).JSON(queryFindItem.Error)
+	}
+
+	return ctx.Status(200).JSON(fiber.Map{
+		"message": "Item deleted successfully",
+		"data":    queryFindItem,
+	})
+
 }

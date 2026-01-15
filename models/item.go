@@ -27,6 +27,10 @@ type ItemRequestData struct {
 	Price       int    `json:"price"`
 }
 
+type ItemIdParam struct {
+	Id 			uint   `json:"id"`
+}
+
 func (Item) ItemTable() string {
 	return "items"
 }

@@ -10,4 +10,6 @@ func ItemRouter(app *fiber.App) {
 	router := app.Group("/items")
 	router.Get("/", controllers.GetItems)
 	router.Post("/", controllers.CreateItem)
+	router.Put("/:id", controllers.UpdateItem)
+	router.Delete("/:id", controller.DeleteItem)
 }
