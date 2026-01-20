@@ -101,7 +101,7 @@ func UpdateItem(ctx *fiber.Ctx) error {
 		Price:       item.Price,
 	}
 
-	query := config.DB.Model(&models.ItemRequestData{}).Where("id = ?", ctx.Params("id")).Updates(updateItem)
+	query := config.DB.Model(&models.ItemRequestData{}).Where("id = ?", ctx.Params("id")).Updates(&updateItem)
 
 	if query.Error != nil {
 		return ctx.Status(500).JSON(query.Error)
@@ -117,17 +117,11 @@ func DeleteItem(ctx *fiber.Ctx) error {
 
 	var params map[string]string = ctx.AllParams()
 
-	queryFindItem := config.DB.Select("id").Find()
-
-	fmt.Println(queryFindItem.Statement.Vars...)
-
-	if queryFindItem.Error != nil {
-		return ctx.Status(500).JSON(queryFindItem.Error)
-	}
+	
 
 	return ctx.Status(200).JSON(fiber.Map{
 		"message": "Item deleted successfully",
-		"data":    queryFindItem,
+		"data":    params,
 	})
 
 }

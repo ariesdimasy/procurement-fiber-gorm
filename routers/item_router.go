@@ -11,5 +11,5 @@ func ItemRouter(app *fiber.App) {
 	router.Get("/", controllers.GetItems)
 	router.Post("/", controllers.CreateItem)
 	router.Put("/:id", controllers.UpdateItem)
-	router.Delete("/:id", controller.DeleteItem)
+	router.Delete("/:id", controllers.DeleteItem)
 }
